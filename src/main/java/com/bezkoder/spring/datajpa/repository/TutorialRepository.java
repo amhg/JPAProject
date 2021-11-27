@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface TutorialRepository extends JpaRepository<Tutorial, Long> {
 	List<Tutorial> findByPublished(boolean published);
 	List<Tutorial> findByTitleContaining(String title);
-	@Query(value = "SELECT * FROM tutorials WHERE title in :titleList") //nativeQuery=True
+/*	@Query(value = "SELECT * FROM tutorials WHERE title in :titleList") //nativeQuery=True
 	List<Tutorial> findByTitleContaining(List<String> titleList);
 
 	//TODO write a query with/without using NaviteQuery JPQL
@@ -19,5 +19,5 @@ public interface TutorialRepository extends JpaRepository<Tutorial, Long> {
 
 	//TODO write a query with/without using NaviteQuery JPQL
 	@Query("select t from Tutorial t where t.title in (:titles)")
-	List<Tutorial> findByTitleV3List(List<String> titles);
+	List<Tutorial> findByTitleV3List(List<String> titles);*/
 }
