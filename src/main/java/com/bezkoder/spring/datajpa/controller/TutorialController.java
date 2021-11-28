@@ -3,21 +3,13 @@ package com.bezkoder.spring.datajpa.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.bezkoder.spring.datajpa.exceptions.TutorialNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.bezkoder.spring.datajpa.model.Tutorial;
 import com.bezkoder.spring.datajpa.repository.TutorialRepository;
@@ -31,25 +23,34 @@ public class TutorialController {
 	TutorialRepository tutorialRepository;
 
 	/**
-	 *
-	 * TODO Patch,Delete,PUT
-	 *
-	 * @param titles
-	 * @return
+	 * Using Native Query
 	 */
 	@PostMapping("/bookList")
 	public ResponseEntity<List<String>> getFilteredTitles(@RequestBody List<String> titles){
-		List<Tutorial> tutorials = new ArrayList<Tutorial>();
 
-		tutorialRepository.findAll().forEach(tutorials::add);
-		return null;
+		List<String> tutorialsName = tutorialRepository.findByTitleContaining(titles)
+				.stream()
+				.map(Tutorial::getDescription)
+				.collect(Collectors.toList());
 
+		return new ResponseEntity<>(tutorialsName, HttpStatus.OK);
 
+	}
+
+	@GetMapping("/bookList/{title}")
+	public ResponseEntity<List<Tutorial>> getFilteredTitle(@PathVariable("title") String title){
+
+		List<Tutorial> tutorials = tutorialRepository.findByTitleV2(title);
+		if(tutorials.size() == 0){
+			throw new TutorialNotFoundException("Could not find tutorial with title: " + title);
+		}
+
+		return new ResponseEntity<>(tutorials, HttpStatus.OK);
 	}
 
 	@GetMapping("/tutorials")
 	public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String title) {
-			List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			List<Tutorial> tutorials = new ArrayList<>();
 
 			System.out.println(title);
 
@@ -99,15 +100,31 @@ public class TutorialController {
 			_tutorial.setPublished(tutorial.isPublished());
 			return new ResponseEntity<>(tutorialRepository.save(_tutorial), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new TutorialNotFoundException("Could not find tutorial with id: " + id);
 		}
+	}
+
+	/**
+	 * PATCH only title
+	 **/
+	@PatchMapping("/tutorials/{id}/{title}")
+	public ResponseEntity<Tutorial> patchTutorialByTitle(@PathVariable("id") long id,
+														 @PathVariable("title") String title){
+		Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
+		if(!tutorialData.isPresent())
+			throw new TutorialNotFoundException("Could not find tutorial with id: " + id);
+
+		Tutorial tutorialDto = tutorialData.get();
+		tutorialDto.setTitle(title);
+
+		return new ResponseEntity<>(tutorialRepository.save(tutorialDto), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/tutorials/{id}")
 	public ResponseEntity<HttpStatus> deleteTutorial(@PathVariable("id") long id) {
 		try {
 			tutorialRepository.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
