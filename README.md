@@ -15,6 +15,10 @@ Example:
         
 public abstract class UpseartableRepository<T extends BaseEntity> implements Upseartable<T>, CrudRepository<T, UUID> {
 
+Currency (used in web app)
+
+Apply Design Patterns
+
 Testing
 
 Debugging 
