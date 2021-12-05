@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.bezkoder.spring.datajpa.exceptions.TutorialNotFoundException;
+import com.bezkoder.spring.datajpa.model.Author;
+import com.bezkoder.spring.datajpa.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +16,15 @@ import org.springframework.web.bind.annotation.*;
 import com.bezkoder.spring.datajpa.model.Tutorial;
 import com.bezkoder.spring.datajpa.repository.TutorialRepository;
 
-@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api")
 public class TutorialController {
 
 	@Autowired
 	TutorialRepository tutorialRepository;
+
+	@Autowired
+	AuthorRepository authorRepository;
 
 	/**
 	 * Using Native Query
@@ -47,6 +51,31 @@ public class TutorialController {
 
 		return new ResponseEntity<>(tutorials, HttpStatus.OK);
 	}
+
+	/***********************************/
+
+	/**
+	 * Joining two tables
+	 */
+
+	@GetMapping("/authors/{authorId}/tutorials")
+	public ResponseEntity<List<Tutorial>> getAllTutorialsByAuthorId(
+							@PathVariable(value = "authorId") Long authorId){
+		return new ResponseEntity<>(tutorialRepository.findByAuthorId(authorId), HttpStatus.OK);
+	}
+
+	@PostMapping("/authors/{authorId}/tutorials")
+	public ResponseEntity<Tutorial> createTutorial(
+						@PathVariable(value = "authorId") Long authorId,
+						@RequestBody Tutorial tutorial
+	){
+		Optional<Author> author = authorRepository.findById(authorId);
+		tutorial.setAuthor(author.get());
+
+		return new ResponseEntity<>(tutorialRepository.save(tutorial), HttpStatus.CREATED);
+	}
+
+	/***********************************/
 
 	@GetMapping("/tutorials")
 	public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String title) {

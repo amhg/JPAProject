@@ -19,6 +19,13 @@ public class Tutorial {
 	@Column(name = "published")
 	private boolean published;
 
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "author_id",
+				nullable = false,
+			foreignKey = @ForeignKey(name = "fk_authors_id")
+	)
+	private Author author;
+
 	public Tutorial() {
 
 	}
@@ -55,6 +62,14 @@ public class Tutorial {
 
 	public void setPublished(boolean isPublished) {
 		this.published = isPublished;
+	}
+
+	public Author getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(Author author) {
+		this.author = author;
 	}
 
 	@Override
