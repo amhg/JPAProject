@@ -12,7 +12,14 @@ public interface TutorialRepository extends JpaRepository<Tutorial, Long> {
 	List<Tutorial> findByPublished(boolean published);
 	List<Tutorial> findByTitleContaining(String title);
 
+	@Query(value = "select t.description, t.title, t.author_id, a.name as AuthorName, a.age from public.tutorials as t\n" +
+			"inner join public.author as a \n" +
+			"on t.author_id = a.id\n" +
+			"where a.id = 1", nativeQuery = true)
 	List<Tutorial> findByAuthorId(Long authorId);
+
+	@Query(value = "select t from Tutorial t where t.author.id=:authorId")
+	List<Tutorial> findByAuthorIdV2(Long authorId);
 
 	@Query(value = "SELECT * FROM tutorials WHERE title in :titleList", nativeQuery = true)
 	List<Tutorial> findByTitleContaining(List<String> titleList);

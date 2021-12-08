@@ -1,5 +1,8 @@
 package com.bezkoder.spring.datajpa.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -19,11 +22,9 @@ public class Tutorial {
 	@Column(name = "published")
 	private boolean published;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "author_id",
-				nullable = false,
-			foreignKey = @ForeignKey(name = "fk_authors_id")
-	)
+	//TODO try with LAZY, change the positions btwn Join and ManyToOne
+	@JoinColumn(name = "author_id",referencedColumnName = "id")
+	@ManyToOne
 	private Author author;
 
 	public Tutorial() {
@@ -74,7 +75,11 @@ public class Tutorial {
 
 	@Override
 	public String toString() {
-		return "Tutorial [id=" + id + ", title=" + title + ", desc=" + description + ", published=" + published + "]";
+		return "Tutorial{" +
+				"title='" + title + '\'' +
+				", description='" + description + '\'' +
+				", published=" + published +
+				", author=" + author +
+				'}';
 	}
-
 }

@@ -61,7 +61,8 @@ public class TutorialController {
 	@GetMapping("/authors/{authorId}/tutorials")
 	public ResponseEntity<List<Tutorial>> getAllTutorialsByAuthorId(
 							@PathVariable(value = "authorId") Long authorId){
-		return new ResponseEntity<>(tutorialRepository.findByAuthorId(authorId), HttpStatus.OK);
+		List<Tutorial> tutorials = tutorialRepository.findByAuthorIdV2(authorId);
+		return new ResponseEntity<>(tutorials, HttpStatus.OK);
 	}
 
 	@PostMapping("/authors/{authorId}/tutorials")
@@ -69,10 +70,11 @@ public class TutorialController {
 						@PathVariable(value = "authorId") Long authorId,
 						@RequestBody Tutorial tutorial
 	){
+
 		Optional<Author> author = authorRepository.findById(authorId);
 		tutorial.setAuthor(author.get());
 
-		return new ResponseEntity<>(tutorialRepository.save(tutorial), HttpStatus.CREATED);
+		return new ResponseEntity<>(tutorial, HttpStatus.CREATED);
 	}
 
 	/***********************************/
